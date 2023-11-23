@@ -37,6 +37,12 @@ const userSchema = new Schema<User, IUserModel>(
     email: {
       type: String,
       required: [true, "Email is required!"],
+      validate: {
+        validator: function (email: string): boolean {
+          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        },
+        message: "Please enter a valid email address!",
+      },
       unique: true,
       lowercase: true,
     },
@@ -47,12 +53,12 @@ const userSchema = new Schema<User, IUserModel>(
   },
   {
     toJSON: {
-      //bejore converting to JSON on all queries removing these fields
       transform(doc, ret) {
         delete ret._id;
         delete ret.__v;
         delete ret.password;
-        delete ret.orders;
+        delete ret.fullName._id;
+        delete ret.address._id;
       },
     },
   }
@@ -62,9 +68,30 @@ userSchema.statics.isExists = async function (userId: string) {
   return await this.findOne({ userId: userId });
 };
 
+userSchema.statics.orderExists = async function (userId: string, order: Order) {
+  return await this.findOne({
+    userId: userId,
+    orders: { $elemMatch: { ...order } },
+  });
+};
+
 userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(
     this.password as string,
+    Number(config.bcrypt_salt)
+  );
+  next();
+});
+
+userSchema.post("save", async function (doc, next) {
+  doc.orders = undefined;
+  next();
+});
+
+userSchema.pre("findOneAndUpdate", async function (next): Promise<void> {
+  const doc = this.getUpdate()!.$set;
+  doc.password = await bcrypt.hash(
+    doc.password as string,
     Number(config.bcrypt_salt)
   );
   next();
