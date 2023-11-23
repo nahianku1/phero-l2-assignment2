@@ -1,24 +1,21 @@
 import { Request, Response } from "express";
 import { UserServices } from "./user.service";
-import { zoduserValidationSchema } from "./user.validation";
+import { zodorderSchema, zoduserValidationSchema } from "./user.validation";
 
 const createUser = async (req: Request, res: Response) => {
-
   try {
-
     const {
       success,
       error,
       data: validUser,
     } = zoduserValidationSchema.safeParse(req.body);
 
-
     if (success) {
       const result = await UserServices.createUserIntoDB(validUser);
       if (result.userId) {
         res.status(200).json({
           success: true,
-          message: "User created succesfully",
+          message: "User created successfully!",
           data: result,
         });
       }
@@ -26,20 +23,19 @@ const createUser = async (req: Request, res: Response) => {
       res.status(400).json({
         success: true,
         message: "Zod validation failed",
-        error: error,
+        error: error.issues[0].message,
       });
     }
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: "Error creating student",
+      message: "Error creating user",
       error: error.message,
     });
   }
 };
 
 const getAllUsers = async (req: Request, res: Response) => {
-
   try {
     const result = await UserServices.getAllUsersUserFromDB();
 
@@ -51,7 +47,7 @@ const getAllUsers = async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: "Error fetching all students",
+      message: "Error fetching all user",
       error: error.message,
     });
   }
@@ -79,10 +75,10 @@ const getSingleUser = async (req: Request, res: Response) => {
         },
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: "Error fetching single student",
+      message: "Error fetching single user",
       error: error.message,
     });
   }
@@ -90,42 +86,57 @@ const getSingleUser = async (req: Request, res: Response) => {
 
 const updateSingleUser = async (req: Request, res: Response) => {
   const { userId } = req.params;
+  
+  const {
+    success,
+    error,
+    data: validUpdateInfo,
+  } = zoduserValidationSchema.safeParse(req.body);
 
-  try {
-    const result = await UserServices.updateSingleUser(userId, req.body);
+  if (success) {
+    try {
+      const result = await UserServices.updateSingleUser(
+        userId,
+        validUpdateInfo
+      );
 
-    if (result?.userId) {
-      res.status(200).json({
-        success: true,
-        message: "User updated successfully!",
-        data: result,
-      });
-    } else {
-      res.status(404).send({
+      if (result?.userId) {
+        res.status(200).json({
+          success: true,
+          message: "User updated successfully!",
+          data: result,
+        });
+      } else {
+        res.status(404).send({
+          success: false,
+          message: "User not found",
+          error: {
+            code: 404,
+            description: "User not found!",
+          },
+        });
+      }
+    } catch (error: any) {
+      res.status(500).json({
         success: false,
-        message: "User not found",
-        error: {
-          code: 404,
-          description: "User not found!",
-        },
+        message: "Error updating user",
+        error: error.message,
       });
     }
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error updating students",
-      error: error.message,
+  } else {
+    res.status(400).json({
+      success: true,
+      message: "Zod validation failed",
+      error:  error.issues[0].message,
     });
   }
 };
 
 const deleteSingleUser = async (req: Request, res: Response) => {
   const { userId } = req.params;
-
   try {
-    const result = await UserServices.deleteSingleUserFromDB(userId);
-
-    if (result?.userId) {
+    const result = await UserServices.deleteSingleUserFromDB(Number(userId));
+    if (result) {
       res.status(200).json({
         success: true,
         message: "User deleted successfully!",
@@ -141,10 +152,10 @@ const deleteSingleUser = async (req: Request, res: Response) => {
         },
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       success: false,
-      message: "Error deleting students",
+      message: "Error deleting user",
       error: error.message,
     });
   }
@@ -153,30 +164,52 @@ const deleteSingleUser = async (req: Request, res: Response) => {
 const updateUserOrders = async (req: Request, res: Response) => {
   const { userId } = req.params;
 
-  try {
-    const result = await UserServices.updateUserOrders(userId, req.body);
+  const {
+    success,
+    error,
+    data: validOrder,
+  } = zodorderSchema.safeParse(req.body);
 
-    if (result?.modifiedCount) {
-      res.status(200).json({
-        success: true,
-        message: "Order created successfully!",
-        data: null,
-      });
-    } else {
-      res.status(500).send({
+  if (success) {
+    try {
+      const result = await UserServices.updateUserOrders(userId, validOrder);
+      if (result?.modifiedCount) {
+        res.status(200).json({
+          success: true,
+          message: "Order created successfully!",
+          data: null,
+        });
+      } else if (result === null) {
+        res.status(500).send({
+          success: false,
+          message: "Order already exists!",
+          error: {
+            code: 500,
+            description: "Order already exists!",
+          },
+        });
+      } else {
+        res.status(404).send({
+          success: false,
+          message: "User not found",
+          error: {
+            code: 404,
+            description: "User not found!",
+          },
+        });
+      }
+    } catch (error: any) {
+      res.status(500).json({
         success: false,
-        message: "Order already exists!",
-        error: {
-          code: 500,
-          description: "Order already exists!",
-        },
+        message: "Error updating order",
+        error: error.message,
       });
     }
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error updating order",
-      error: error.message,
+  } else {
+    res.status(400).json({
+      success: true,
+      message: "Zod validation failed",
+      error:  error.issues[0].message,
     });
   }
 };
@@ -186,7 +219,6 @@ const getAllOrder = async (req: Request, res: Response) => {
 
   try {
     const result = await UserServices.getAllOrdersfromUser(userId);
-    console.log(result, __filename, 195);
 
     if (result) {
       res.status(200).json({
@@ -205,6 +237,8 @@ const getAllOrder = async (req: Request, res: Response) => {
       });
     }
   } catch (error: any) {
+    console.log(error);
+
     res.status(500).json({
       success: false,
       message: "Error fetching order",
@@ -218,7 +252,6 @@ const getTotalPrice = async (req: Request, res: Response) => {
 
   try {
     const result = await UserServices.getToalPricefromDB(userId);
-    // console.log(result,__filename,227);
 
     if (result) {
       res.status(200).json({

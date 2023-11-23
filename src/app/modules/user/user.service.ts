@@ -5,16 +5,16 @@ const createUserIntoDB = async (user: User) => {
   const result = await UserModel.create(user);
   return result;
 };
+
 const getAllUsersUserFromDB = async () => {
   const result = await UserModel.find(
     {},
-    { userId: 1, fullName: 1, age: 1, email: 1, address: 1 }
+    { username: 1, fullName: 1, age: 1, email: 1, address: 1 }
   );
   return result;
 };
 
 const getSingleUserFromDB = async (userId: number) => {
-  console.log(userId, 17);
   const existingUser = await UserModel.isExists(userId);
   if (existingUser) {
     const result = await UserModel.findOne({ userId: userId });
@@ -25,7 +25,6 @@ const getSingleUserFromDB = async (userId: number) => {
   }
 };
 const updateSingleUser = async (userId: number, updatedInfo: User) => {
-  console.log(`Servet hit from update user`);
   const existingUser = await UserModel.isExists(userId);
   if (existingUser) {
     await UserModel.validate(updatedInfo);
@@ -34,7 +33,6 @@ const updateSingleUser = async (userId: number, updatedInfo: User) => {
       { $set: { ...updatedInfo } },
       { new: true, runValidators: true }
     );
-    console.log(result, 35);
 
     return result;
   } else {
@@ -46,8 +44,6 @@ const deleteSingleUserFromDB = async (userId: number) => {
   const existingUser = await UserModel.isExists(userId);
   if (existingUser) {
     const result = await UserModel.findOneAndDelete({ userId });
-    console.log(result, 45);
-
     return result;
   } else {
     return existingUser;
@@ -58,20 +54,20 @@ const updateUserOrders = async (userId: number, order: Order) => {
   const existingUser = await UserModel.isExists(userId);
   if (existingUser) {
     const existingOrder = await UserModel.orderExists(userId, order);
-    console.log(existingOrder, 61);
     if (existingOrder) {
       return null;
     } else {
       const result = await UserModel.updateOne(
         { userId },
-        { $addToSet: { orders: { ...order } } }
+        { $addToSet: { orders: { ...order } } },
+        { new: true, runValidators: true }
       );
-      console.log(result, 55);
+      console.log(result, __filename, 65);
 
       return result;
     }
   } else {
-    return existingUser;
+    return undefined;
   }
 };
 
@@ -83,7 +79,6 @@ const getAllOrdersfromUser = async (userId: number) => {
       { userId: userId },
       { orders: 1, _id: 0 }
     );
-    console.log(result[0], 86);
     return result[0];
   } else {
     return existingUser;
@@ -91,9 +86,7 @@ const getAllOrdersfromUser = async (userId: number) => {
 };
 
 const getToalPricefromDB = async (userId: number) => {
-  console.log(`Servet hit from Total Price`);
   const existingUser = await UserModel.isExists(userId);
-  console.log(existingUser, 96);
 
   if (existingUser) {
     const result = await UserModel.aggregate([
@@ -115,9 +108,9 @@ const getToalPricefromDB = async (userId: number) => {
       {
         $addFields: { totalPrice: "$totalPrice" },
       },
+
       { $project: { _id: 0 } },
     ]);
-    console.log(result);
 
     return result[0];
   } else {

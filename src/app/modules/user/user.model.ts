@@ -1,4 +1,4 @@
-import mongoose, { Model, Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import { Address, FullName, IUserModel, Order, User } from "./user.interface";
 import config from "../../../config/config";
 import bcrypt from "bcrypt";
@@ -54,11 +54,15 @@ const userSchema = new Schema<User, IUserModel>(
   {
     toJSON: {
       transform(doc, ret) {
+        console.log({doc,ret} ,57);
+
         delete ret._id;
         delete ret.__v;
         delete ret.password;
-        delete ret.fullName._id;
-        delete ret.address._id;
+        if (ret.fullName) {
+          delete ret.fullName._id;
+          delete ret.address._id;
+        }
       },
     },
   }
@@ -75,7 +79,7 @@ userSchema.statics.orderExists = async function (userId: string, order: Order) {
   });
 };
 
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function (next): Promise<void> {
   this.password = await bcrypt.hash(
     this.password as string,
     Number(config.bcrypt_salt)
@@ -83,9 +87,16 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-userSchema.post("save", async function (doc, next) {
+userSchema.post("save", async function (doc, next): Promise<void> {
   doc.orders = undefined;
   next();
+});
+
+userSchema.post(/^find/, async function (doc, next): Promise<void> {
+  if (doc !== null) {
+    doc.orders = undefined;
+    next();
+  }
 });
 
 userSchema.pre("findOneAndUpdate", async function (next): Promise<void> {
