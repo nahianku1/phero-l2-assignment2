@@ -1,5 +1,5 @@
 import mongoose, { Model, Schema } from "mongoose";
-import { Address, FullName, Order, User } from "./user.interface";
+import { Address, FullName, IUserModel, Order, User } from "./user.interface";
 import config from "../../../config/config";
 import bcrypt from "bcrypt";
 
@@ -20,7 +20,7 @@ const orderSchema = new Schema<Order>({
   quantity: { type: Number, required: [true, "Product quantity is required!"] },
 });
 
-const userSchema = new Schema<User>(
+const userSchema = new Schema<User, IUserModel>(
   {
     userId: {
       type: Number,
@@ -46,7 +46,8 @@ const userSchema = new Schema<User>(
     orders: { type: [orderSchema] },
   },
   {
-    toJSON: {          //bejore converting to JSON on all queries removing these fields
+    toJSON: {
+      //bejore converting to JSON on all queries removing these fields
       transform(doc, ret) {
         delete ret._id;
         delete ret.__v;
@@ -57,6 +58,10 @@ const userSchema = new Schema<User>(
   }
 );
 
+userSchema.statics.isExists = async function (userId: string) {
+  return await this.findOne({ userId: userId });
+};
+
 userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(
     this.password as string,
@@ -65,4 +70,4 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-export const UserModel = mongoose.model<User>("User", userSchema);
+export const UserModel = mongoose.model<User, IUserModel>("User", userSchema);
