@@ -2,7 +2,7 @@
   "name": "l2-b2-assignment2",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/server.js",
   "scripts": {
     "start": "node ./dist/server.js",
     "build": "tsc",

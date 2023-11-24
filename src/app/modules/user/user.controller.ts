@@ -3,14 +3,14 @@ import { UserServices } from "./user.service";
 import { zodorderSchema, zoduserValidationSchema } from "./user.validation";
 
 const createUser = async (req: Request, res: Response) => {
-  try {
-    const {
-      success,
-      error,
-      data: validUser,
-    } = zoduserValidationSchema.safeParse(req.body);
+  const {
+    success,
+    error,
+    data: validUser,
+  } = zoduserValidationSchema.safeParse(req.body);
 
-    if (success) {
+  if (success) {
+    try {
       const result = await UserServices.createUserIntoDB(validUser);
       if (result.userId) {
         res.status(200).json({
@@ -19,18 +19,18 @@ const createUser = async (req: Request, res: Response) => {
           data: result,
         });
       }
-    } else {
-      res.status(400).json({
-        success: true,
-        message: "Zod validation failed",
-        error: error.issues[0].message,
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: "Error creating user",
+        error: error.message,
       });
     }
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: "Error creating user",
-      error: error.message,
+  } else {
+    res.status(400).json({
+      success: true,
+      message: "Zod validation failed",
+      error: error.issues[0].message,
     });
   }
 };
@@ -86,7 +86,7 @@ const getSingleUser = async (req: Request, res: Response) => {
 
 const updateSingleUser = async (req: Request, res: Response) => {
   const { userId } = req.params;
-  
+
   const {
     success,
     error,
@@ -127,7 +127,7 @@ const updateSingleUser = async (req: Request, res: Response) => {
     res.status(400).json({
       success: true,
       message: "Zod validation failed",
-      error:  error.issues[0].message,
+      error: error.issues[0].message,
     });
   }
 };
@@ -209,7 +209,7 @@ const updateUserOrders = async (req: Request, res: Response) => {
     res.status(400).json({
       success: true,
       message: "Zod validation failed",
-      error:  error.issues[0].message,
+      error: error.issues[0].message,
     });
   }
 };

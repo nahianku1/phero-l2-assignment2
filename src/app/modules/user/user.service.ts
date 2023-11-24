@@ -18,7 +18,6 @@ const getSingleUserFromDB = async (userId: number) => {
   const existingUser = await UserModel.isExists(userId);
   if (existingUser) {
     const result = await UserModel.findOne({ userId: userId });
-
     return result;
   } else {
     return existingUser;
@@ -26,6 +25,7 @@ const getSingleUserFromDB = async (userId: number) => {
 };
 const updateSingleUser = async (userId: number, updatedInfo: User) => {
   const existingUser = await UserModel.isExists(userId);
+
   if (existingUser) {
     await UserModel.validate(updatedInfo);
     const result = await UserModel.findOneAndUpdate(
@@ -33,7 +33,6 @@ const updateSingleUser = async (userId: number, updatedInfo: User) => {
       { $set: { ...updatedInfo } },
       { new: true, runValidators: true }
     );
-
     return result;
   } else {
     return existingUser;
@@ -94,9 +93,6 @@ const getToalPricefromDB = async (userId: number) => {
         $unwind: "$orders",
       },
       {
-        $match: { userId: Number(userId) },
-      },
-      {
         $group: {
           _id: "$userId",
           totalPrice: {
@@ -104,13 +100,11 @@ const getToalPricefromDB = async (userId: number) => {
           },
         },
       },
-
       {
-        $addFields: { totalPrice: "$totalPrice" },
+        $match: { _id: Number(userId) },
       },
-
       { $project: { _id: 0 } },
-    ]);
+    ]).exec();
 
     return result[0];
   } else {
