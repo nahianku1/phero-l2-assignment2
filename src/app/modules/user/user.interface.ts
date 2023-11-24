@@ -32,5 +32,5 @@ export interface User {
 
 export interface IUserModel extends Model<User> {
   isExists(id: number): Promise<User | unknown>;
-  orderExists(id: string, order: Order): Promise<Order | unknown>;
+  orderExists(id: number, order: Order): Promise<Order | unknown>;
 }

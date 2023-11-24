@@ -59,7 +59,7 @@ const getSingleUser = async (req: Request, res: Response) => {
   const { userId } = req.params;
 
   try {
-    const result = await UserServices.getSingleUserFromDB(userId);
+    const result = await UserServices.getSingleUserFromDB(Number(userId));
 
     if (result?.userId) {
       res.status(200).json({
@@ -98,7 +98,7 @@ const updateSingleUser = async (req: Request, res: Response) => {
   if (success) {
     try {
       const result = await UserServices.updateSingleUser(
-        userId,
+        Number(userId),
         validUpdateInfo
       );
 
@@ -174,7 +174,7 @@ const updateUserOrders = async (req: Request, res: Response) => {
 
   if (success) {
     try {
-      const result = await UserServices.updateUserOrders(userId, validOrder);
+      const result = await UserServices.updateUserOrders(Number(userId), validOrder);
       if (result?.modifiedCount) {
         res.status(200).json({
           success: true,
@@ -220,7 +220,7 @@ const getAllOrder = async (req: Request, res: Response) => {
   const { userId } = req.params;
 
   try {
-    const result = await UserServices.getAllOrdersfromUser(userId);
+    const result = await UserServices.getAllOrdersfromUser(Number(userId));
 
     if (result) {
       res.status(200).json({
@@ -253,7 +253,7 @@ const getTotalPrice = async (req: Request, res: Response) => {
   const { userId } = req.params;
 
   try {
-    const result = await UserServices.getToalPricefromDB(userId);
+    const result = await UserServices.getToalPricefromDB(Number(userId));
 
     if (result) {
       res.status(200).json({
