@@ -8,24 +8,30 @@ This is a simple user order api. You can create their account, update their acco
 ###### Create .env file:
 **Create a new environment file and put it these variables:**
 
->PORT=PORT_NUMBER
->DATABASE_URL=YOUR_DATABASE_URL
->BCRYPT_SALT_ROUNDS=BYCRYPT_SALT_ROUNDS NUMBER 
+```javascript
+PORT=PORT_NUMBER
+DATABASE_URL=YOUR_DATABASE_URL
+BCRYPT_SALT_ROUNDS=BYCRYPT_SALT_ROUNDS NUMBER 
+
+```
 
 ###### You have to run these commands to run typescript locally:
-```javascript
 
- npm install
- npm run dev
+
+```javascript
+npm install
+npm run dev
 ```
 
 ###### You have to run these commands to run javascript locally:
+
 ```javascript
   npm run build
   npm start
 ```
 
 ###### You have to run this command for linting:
+
 ```javascript
   npm run lint
 ```
