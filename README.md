@@ -10,7 +10,7 @@ This is a simple user order api. You can create their account, update their acco
 
 >PORT=PORT_NUMBER
 >DATABASE_URL=YOUR_DATABASE_URL
->BCRYPT_SALT_ROUNDS=BYCRYPT_SALT_ROUNDS NUMBER *//   ex:10*
+>BCRYPT_SALT_ROUNDS=BYCRYPT_SALT_ROUNDS NUMBER 
 
 ###### You have to run these commands to run typescript locally:
 ```javascript
