@@ -66,7 +66,7 @@ const userSchema = new Schema<User, IUserModel>(
     address: { type: addressSchema, required: [true, "Address is required!"] },
     orders: { type: [orderSchema] },
   },
-  // while converting 
+  // while converting to JSON, deleting unnecessary fields from resulting document at schema level. this will be applied to all documents. 
   {
     toJSON: {
       transform(doc, ret) {

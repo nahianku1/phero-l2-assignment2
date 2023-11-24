@@ -1,11 +1,14 @@
 import { Order, User } from "./user.interface";
 import { UserModel } from "./user.model";
 
+
+// create a new user into the database
 const createUserIntoDB = async (user: User) => {
   const result = await UserModel.create(user);
   return result;
 };
 
+// getting all user from the database
 const getAllUsersUserFromDB = async () => {
   const result = await UserModel.find(
     {},
@@ -14,6 +17,7 @@ const getAllUsersUserFromDB = async () => {
   return result;
 };
 
+//getting single user from database
 const getSingleUserFromDB = async (userId: number) => {
   const existingUser = await UserModel.isExists(userId);
   if (existingUser) {
@@ -23,6 +27,8 @@ const getSingleUserFromDB = async (userId: number) => {
     return existingUser;
   }
 };
+
+// updating a single user 
 const updateSingleUser = async (userId: number, updatedInfo: User) => {
   const existingUser = await UserModel.isExists(userId);
 
@@ -39,6 +45,7 @@ const updateSingleUser = async (userId: number, updatedInfo: User) => {
   }
 };
 
+//Deleting a single user from the database
 const deleteSingleUserFromDB = async (userId: number) => {
   const existingUser = await UserModel.isExists(userId);
   if (existingUser) {
@@ -49,6 +56,7 @@ const deleteSingleUserFromDB = async (userId: number) => {
   }
 };
 
+//updating specific user order
 const updateUserOrders = async (userId: number, order: Order) => {
   const existingUser = await UserModel.isExists(userId);
   if (existingUser) {
@@ -70,6 +78,7 @@ const updateUserOrders = async (userId: number, order: Order) => {
   }
 };
 
+// getting all orders of specified user
 const getAllOrdersfromUser = async (userId: number) => {
   const existingUser = await UserModel.isExists(userId);
 
@@ -84,6 +93,7 @@ const getAllOrdersfromUser = async (userId: number) => {
   }
 };
 
+//calculating total price of all orders for specified user
 const getToalPricefromDB = async (userId: number) => {
   const existingUser = await UserModel.isExists(userId);
 
